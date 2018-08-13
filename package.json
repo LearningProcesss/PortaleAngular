@@ -1,0 +1,28 @@
+{
+  "name": "portaleangular",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_ENV=test mocha backend/testing/*.test.js",
+    "start": "NODE_ENV=development DEBUG=app* nodemon backend/server.js",
+    "debug": "NODE_ENV=development DEBUG=app* node --nolazy --inspect-brk=9000 backend/server.js"
+  },
+  "author": "Minerva Mattia",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
+    "debug": "^3.1.0",
+    "expect": "^23.4.0",
+    "express": "^4.16.3",
+    "jsonwebtoken": "^8.3.0",
+    "lodash": "^4.17.10",
+    "mocha": "^5.2.0",
+    "mongoose": "^5.2.5",
+    "mongoose-unique-validator": "^2.0.1",
+    "nodemon": "^1.18.3",
+    "supertest": "^3.1.0"
+  }
+}

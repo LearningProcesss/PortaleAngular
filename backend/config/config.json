@@ -1,0 +1,17 @@
+{
+    "test": {
+        "PORT": 3000,
+        "MONGODB_URI": "mongodb://localhost:27017/PortaleSupportoAngular",
+        "JWT_SECRET": "2wsxZAQ!"
+    },
+    "development": {
+        "PORT": 3000,
+        "MONGODB_URI": "mongodb://localhost:27017/PortaleSupportoAngular",
+        "JWT_SECRET": "2wsxZAQ!"
+    },
+    "prod": {
+        "PORT": 3000,
+        "MONGODB_URI": "mongodb://localhost:27017/ToDoApp",
+        "JWT_SECRET": "2wsxZAQ!"
+    }
+}
