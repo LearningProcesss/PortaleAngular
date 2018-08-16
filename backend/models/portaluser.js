@@ -38,8 +38,9 @@ const schema = mongoose.Schema({
     },
     _azienda: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Azienda',
-        required: true
+        ref: 'Azienda'
+        // ,
+        // required: true
     }
 });
 
@@ -63,7 +64,7 @@ schema.methods.creaToken = function () {
     try {
         var token = jwt.sign({
             email: portaluser.email, id: portaluser._id
-        }, process.env.JWT_SECRET, { expiresIn: "1h" })
+        }, process.env.JWT_SECRET, { expiresIn: "12h" })
 
         d("creaToken", token)
         return token;

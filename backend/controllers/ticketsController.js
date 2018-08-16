@@ -38,31 +38,39 @@ exports.getTicket = async (req, resp) => {
 
 exports.getTickets = async (req, resp) => {
 
-    const pageSize = (_.isNull(req.query.pagesize) || _.isUndefined(req.query.pagesize)) ? 10 : +req.query.pagesize
+    var pagedResult = new PagedResult(1, 1)
 
-    const currentPage = (_.isNull(req.query.page) || _.isUndefined(req.query.page)) ? 1 : +req.query.page
+    pagedResult.setcollection = await Ticket.aggregate([req.mongoroute.filter])
 
-    const querytecnico = (_.isNull(req.query._tecnico) || _.isUndefined(req.query._tecnico)) ? "" : req.query._tecnico
+    // pagedResult.setcollection = await Ticket.aggregate([{ $match: { "eventi.creatoDa": { $eq: "Alberto Giachetti" } } }])
 
-    d("tecnico:", querytecnico)
+    d("ret", pagedResult)
 
-    var ret = Ticket.find({ _tecnico: querytecnico })
-        .populate("_cliente", "nome cognome")
-        .populate("_tecnico", "nome cognome")
+    // const pageSize = (_.isNull(req.query.pagesize) || _.isUndefined(req.query.pagesize)) ? 10 : +req.query.pagesize
 
-    if (pageSize && currentPage) {
-        ret.skip(pageSize * (currentPage - 1)).limit(pageSize);
-    }
+    // const currentPage = (_.isNull(req.query.page) || _.isUndefined(req.query.page)) ? 1 : +req.query.page
 
-    var pageResult = new PagedResult(currentPage, pageSize);
+    // const querytecnico = (_.isNull(req.query._tecnico) || _.isUndefined(req.query._tecnico)) ? "" : req.query._tecnico
 
-    pageResult.setcollection = await ret;
+    // d("tecnico:", querytecnico)
 
-    pageResult.count = await Ticket.countDocuments();
+    // var ret = Ticket.find({ _tecnico: new ObjectID(querytecnico) })
 
-    d("pagedresult", pageResult.collection)
+    // if (pageSize && currentPage) {
+    //     ret.skip(pageSize * (currentPage - 1)).limit(pageSize)
+    // }
 
-    resp.json(pageResult)
+    // var pageResult = new PagedResult(currentPage, pageSize)
+
+    // pageResult.setcollection = await ret.populate("_cliente", "nome cognome").populate("_tecnico", "nome cognome")
+
+    // pageResult.count = await Ticket.countDocuments()
+
+    // d("pagedresult", JSON.stringify(pageResult.collection))
+
+    // resp.json(pageResult)
+
+    resp.json(pagedResult)
 }
 
 exports.saveTicket = async (req, resp) => {
@@ -76,7 +84,7 @@ exports.saveTicket = async (req, resp) => {
     }
 
     try {
-        
+
         const ret = await nuovoTicket.save()
 
         resp.status(201).json({ id: ret._id })

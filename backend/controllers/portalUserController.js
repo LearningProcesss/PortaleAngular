@@ -50,7 +50,7 @@ exports.signin = async (req, resp) => {
         usr.ultimoLogin = Date.now()
         await usr.save()
 
-        resp.status(200).json({ token: tok, expire: 3600 * 1000, uId: usr._id, messaggio: "", authOk: true, nome: usr.fullName });
+        resp.status(200).json({ token: tok, expire: 6600 * 1000, uId: usr._id, messaggio: "", authOk: true, nome: usr.fullName });
 
     } catch (error) {
 

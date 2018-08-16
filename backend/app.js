@@ -23,11 +23,11 @@ app.use(cookieParser())
 app.use(mongoRouteMid({
   routeUser:
   {
-    routeUrl: "/api/users", schema: PortalUser.schema
+    routeUrl: "/api/users", schema: PortalUser.schema, model: PortalUser
   },
   routeTicket:
   {
-    routeUrl: "/api/tickets", schema: Ticket.schema
+    routeUrl: "/api/tickets", schema: Ticket.schema, model: Ticket
   }
 }))
 
@@ -40,7 +40,7 @@ app.use((req, resp, next) => {
   resp.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PATCH, PUT, DELETE, OPTIONS"
-  );
+  );req.
   next();
 });
 
