@@ -27,7 +27,7 @@ app.use(mongoRouteMid({
   },
   routeTicket:
   {
-    routeUrl: "/api/tickets", schema: Ticket.schema, model: Ticket
+    routeUrl: "/api/tickets", db: db.mongoose, model: Ticket
   }
 }))
 

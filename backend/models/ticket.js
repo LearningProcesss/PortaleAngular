@@ -1,8 +1,15 @@
-var mongoose = require('mongoose')
-// var moment = require('moment');
-// var { Stato } = require('./stato');
+const mongoose = require('mongoose')
 const _ = require('lodash');
-var d = require('debug')("app:TicketSchema")
+const d = require('debug')("app:TicketSchema")
+
+const testSchema = new mongoose.Schema({
+    propAA: {
+        type: String
+    },
+    propBB: {
+        type: Number
+    }
+})
 
 var TicketSchema = mongoose.Schema({
     titolo: {
@@ -24,8 +31,8 @@ var TicketSchema = mongoose.Schema({
     },
     task: {
         type: String,
-        enum: ['Installazione modulo', 'Configurazione', 'Sviluppo custom', 'Manutenzione'],
-        default: 'Non urgente',
+        enum: ['Installazione modulo', 'Configurazione', 'Sviluppo custom', 'Manutenzione', 'Altro'],
+        default: 'Altro',
         required: true
     },
     // _idPrio: {
@@ -97,30 +104,22 @@ var TicketSchema = mongoose.Schema({
         file: {
             type: String
         }
-    }]
+    }],
+    oggettoTest: {
+        propA: {
+            type: String
+        },
+        propB: {
+            type: Number
+        },
+        propC: {
+            type: Date
+        }
+    },
+    subOggetto: {
+        type: testSchema
+    }
 });
-
-// TicketSchema.pre('save', function (next) {
-
-//     var ticket = this;
-
-//     ticket.creatoIl = moment.now();
-
-//     if (_.isUndefined(ticket._idStato)) {
-//         Stato.findOne({ nome: 'Inbox' }).then((stato) => {
-//             console.log('********', stato);
-
-//             ticket._idStato = stato._id;
-
-//             console.log('**************', ticket);
-
-//             next();
-
-//         });
-//     }
-
-//     next();
-// });
 
 
 TicketSchema.pre('update', function (next) {
@@ -145,7 +144,7 @@ TicketSchema.pre('update', function (next) {
     next()
 })
 
-var Ticket = mongoose.model('Ticket', TicketSchema);
+let Ticket = mongoose.model('Ticket', TicketSchema);
 
 
 

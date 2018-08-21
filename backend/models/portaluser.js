@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const uniqueValidator = require("mongoose-unique-validator")
+// const uniqueValidator = require("mongoose-unique-validator")
 
 var d = require('debug')("app:PortalUserSchema")
 
@@ -118,7 +118,7 @@ schema.pre("save", function (next) {
     });
 })
 
-schema.plugin(uniqueValidator)
+// schema.plugin(uniqueValidator)
 
 var PortalUser = mongoose.model('PortalUser', schema);
 

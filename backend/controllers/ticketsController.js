@@ -38,13 +38,13 @@ exports.getTicket = async (req, resp) => {
 
 exports.getTickets = async (req, resp) => {
 
-    var pagedResult = new PagedResult(1, 1)
+    // resp.json(req.mongoroute.aggregatorResult)
 
-    pagedResult.setcollection = await Ticket.aggregate([req.mongoroute.filter])
+    var pagedResult = new PagedResult(1, 1)
+    //pagedResult.setcollection = await Ticket.count()
+    pagedResult.setcollection = await Ticket.aggregate(req.mongoroute.aggregatorResult)
 
     // pagedResult.setcollection = await Ticket.aggregate([{ $match: { "eventi.creatoDa": { $eq: "Alberto Giachetti" } } }])
-
-    d("ret", pagedResult)
 
     // const pageSize = (_.isNull(req.query.pagesize) || _.isUndefined(req.query.pagesize)) ? 10 : +req.query.pagesize
 
@@ -54,7 +54,7 @@ exports.getTickets = async (req, resp) => {
 
     // d("tecnico:", querytecnico)
 
-    // var ret = Ticket.find({ _tecnico: new ObjectID(querytecnico) })
+    //  var ret = Ticket.find({ _tecnico: new ObjectID(querytecnico) })
 
     // if (pageSize && currentPage) {
     //     ret.skip(pageSize * (currentPage - 1)).limit(pageSize)
@@ -62,13 +62,11 @@ exports.getTickets = async (req, resp) => {
 
     // var pageResult = new PagedResult(currentPage, pageSize)
 
-    // pageResult.setcollection = await ret.populate("_cliente", "nome cognome").populate("_tecnico", "nome cognome")
+    //  pageResult.setcollection = await ret.populate("_cliente", "nome cognome").populate("_tecnico", "nome cognome")
 
-    // pageResult.count = await Ticket.countDocuments()
+    // pageResult.count = await ret.count()
 
-    // d("pagedresult", JSON.stringify(pageResult.collection))
-
-    // resp.json(pageResult)
+    // d("pagedresult", pageResult)
 
     resp.json(pagedResult)
 }
