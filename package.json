@@ -11,6 +11,9 @@
   "author": "Minerva Mattia",
   "license": "ISC",
   "dependencies": {
+    "@angular/animations": "^6.1.3",
+    "@angular/cdk": "^6.4.6",
+    "@angular/material": "^6.4.6",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "cookie-parser": "^1.4.3",
