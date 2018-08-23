@@ -1,3 +1,19 @@
-<p>
-  login works!
-</p>
+<mat-tab-group class="boxed">
+  <mat-tab label="Login">
+    <mat-card>
+      <!-- <mat-spinner *ngIf=""></mat-spinner> -->
+      <form (submit)="onLoginClick(loginForm)" #loginForm="ngForm">
+        <mat-form-field>
+          <input matInput name="email" ngModel #emailField="ngModel" placeholder="email" required email>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput type="password" ngModel #passwordField="ngModel" name="password">
+        </mat-form-field>
+        <button mat-raised-button color="accent" type="submit">Login</button>
+      </form>
+    </mat-card>
+  </mat-tab>
+  <mat-tab label="Signup">
+
+  </mat-tab>
+</mat-tab-group>

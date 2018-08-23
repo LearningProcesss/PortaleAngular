@@ -13,10 +13,7 @@ export class AppCanActivateGuard implements CanActivate {
     @Select(AuthState.stateLoginOk) stateLogin$: Observable<boolean>;
 
     constructor(private store: Store, private router: Router) { }
-    canActivate(
-        route: ActivatedRouteSnapshot,
-        state: RouterStateSnapshot
-    ): Observable<boolean> | Promise<boolean> | boolean {
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
         const token = this.store.selectSnapshot(AuthState.stateToken);
 
         if (token == null) {

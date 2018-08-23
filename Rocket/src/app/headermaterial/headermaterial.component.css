@@ -1,0 +1,19 @@
+.sidenav-container {
+  height: 100%;
+}
+
+.sidenav {
+  width: 200px;
+  box-shadow: 1px 0 1px rgba(0, 0, 0, 0.24) 
+}
+
+.mat-toolbar.mat-primary {
+  position: sticky;
+  top: 0;
+}
+
+/* @media(min-width: 768px) {
+  .sidenav {
+    display: none;
+  }
+} */

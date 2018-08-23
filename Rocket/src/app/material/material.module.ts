@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import { MatPaginatorModule, MatInputModule, MatCardModule, MatExpansionModule, MatProgressSpinnerModule, MatButtonModule, MatToolbarModule, MatDialogModule, MatSidenavModule, MatIconModule, MatListModule, MatGridListModule, MatTabsModule, MatTabGroup, MatTabGroupBase, MatButtonToggleModule, MatTooltipModule, MatCheckboxModule } from "@angular/material";
+import { LayoutModule } from '@angular/cdk/layout';
+import { MatPaginatorModule, MatInputModule, MatCardModule, MatExpansionModule, MatProgressSpinnerModule, MatButtonModule, MatToolbarModule, MatDialogModule, MatSidenavModule, MatIconModule, MatListModule, MatGridListModule, MatTabsModule, MatTabGroup, MatTabGroupBase, MatButtonToggleModule, MatTooltipModule, MatCheckboxModule, MatSlideToggleModule } from "@angular/material";
 
 
 @NgModule({
@@ -22,7 +22,9 @@ import { MatPaginatorModule, MatInputModule, MatCardModule, MatExpansionModule, 
     MatTabsModule,
     MatButtonToggleModule,
     MatTooltipModule,
-    MatSidenavModule
+    MatSidenavModule,
+    MatSlideToggleModule,
+    LayoutModule
   ],
   declarations: [
 
@@ -34,6 +36,7 @@ import { MatPaginatorModule, MatInputModule, MatCardModule, MatExpansionModule, 
     MatListModule,
     MatIconModule,
     MatInputModule,
+    MatSlideToggleModule,
     MatCardModule,
     MatButtonModule,
     MatToolbarModule,
@@ -47,7 +50,8 @@ import { MatPaginatorModule, MatInputModule, MatCardModule, MatExpansionModule, 
     MatButtonToggleModule,
     MatTooltipModule,
     MatSidenavModule,
-    MatGridListModule
+    MatGridListModule,
+    LayoutModule
   ]
 })
 export class MaterialModule { }

@@ -2,12 +2,11 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from './material/material.module';
 
 import { AppRoutingModule } from './app.routing.module';
 
-import { HeaderComponent } from './header/header.component';
 import { AppComponent } from './app.component';
 import { TokenInterceptor } from './app.interceptor';
 
@@ -17,6 +16,9 @@ import { TicketState } from './ticket/state/ticket.state';
 import { AuthState } from './auth/state/auth.state';
 
 import { CookieService } from 'ngx-cookie-service';
+import { HeadermaterialComponent } from './headermaterial/headermaterial.component';
+
+// import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule } from '@angular/material';
 
 
 
@@ -24,15 +26,22 @@ import { CookieService } from 'ngx-cookie-service';
   imports: [
     CommonModule,
     BrowserModule,//importantissimo!
+    BrowserAnimationsModule,
     AppRoutingModule,
     NgxsModule.forRoot([TicketState, AuthState]),
     NgxsRouterPluginModule.forRoot(),
     MaterialModule,
     HttpClientModule
+    // LayoutModule,
+    // MatToolbarModule,
+    // MatButtonModule,
+    // MatSidenavModule,
+    // MatIconModule,
+    // MatListModule
   ],
   declarations: [
     AppComponent,
-    HeaderComponent
+    HeadermaterialComponent
   ],
   providers: [
     CookieService,

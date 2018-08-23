@@ -46,7 +46,7 @@ export class AuthState {
     @Action(LoginAction)
     doLogin(ctx: StateContext<AuthStateModel>, action: LoginAction) {
 
-        console.log("state LoginAction");
+        console.log("state LoginAction", action);
 
         if (action.payload.email === "" && action.payload.password === "") {
 
@@ -71,10 +71,6 @@ export class AuthState {
             this.http.post(environment.api + "users/signin", { email: action.payload.email, password: action.payload.password })
                 .subscribe((response: AuthTransportData) => {
 
-                    // var state = ctx.getState();
-
-                    // console.log("prima", state);
-
                     ctx.patchState(
                         {
                             uid: response.uId,
@@ -85,6 +81,8 @@ export class AuthState {
                             nome: response.nome
                         }
                     );
+
+                    // console.log(ctx.getState());
 
                     this.authCache.saveLocal(response.token, response.expire, response.uId, response.nome);
 
@@ -97,7 +95,7 @@ export class AuthState {
 
     @Action(LoginSuccesfull)
     onLoginSuccess(ctx: StateContext<AuthStateModel>, action: LoginSuccesfull) {
-        ctx.dispatch(new Navigate(['/commandcenter']));
+        ctx.dispatch(new Navigate(['/tickets']));
     }
 
     private setTimer(durata: number) {
