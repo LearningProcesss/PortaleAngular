@@ -5,6 +5,7 @@
 const { ObjectID } = require("mongodb")
 const _ = require("lodash")
 const d = require('debug')("app:routeToMongoMiddleware")
+const url = require("url")
 
 
 const defaultActionsParser = {
@@ -13,8 +14,19 @@ const defaultActionsParser = {
    * @param {any} schema 
    * @param {any} aggregateBuilder 
    */
-  q: function (requestQueryString, aggregateBuilder) {
+  q: function (requestQueryString, aggregateBuilder, queryOperator) {
+
+    aggregateBuilder.push(buildMatchPipelineStage(null, queryOperator))
+
     divide(requestQueryString).map(singleRawPrm => parseSingleUrlQueryParam(singleRawPrm.split(regDividePrm.options), singleRawPrm.split(regDividePrm.options2), aggregateBuilder))
+  },
+  p: function (requestProjectionString, aggregateBuilder) {
+    if (!_.isNil(requestProjectionString)) {
+
+      aggregateBuilder.push({ $project: {} })
+
+      divide(requestProjectionString).map(singleRawPrm => parseSingleUrlProjectionParam(singleRawPrm.split(regDividePrm.options), singleRawPrm.split(regDividePrm.options2), aggregateBuilder))
+    }
   }
 }
 
@@ -47,18 +59,30 @@ module.exports = function (options) {
   return function (req, res, next) {
     d("MAIN request", req.method)
     d("MAIN query", req.query.q)
-    d("MAIN projection", req.query.f)
+    d("MAIN projection", req.query.p)
+    d("MAIN equality match operator", req.query.eo)
 
-    holder.db = options.routeTicket.db
-    holder.schema = options.routeTicket.model.schema
+    let parsed = url.parse(req.url)
 
-    //d("MAIN", holder.schema)
+    console.log("parsed", parsed);
+
+    if (parsed.pathname === options.routeUser.routeUrl) {
+      holder.db = options.routeUser.db
+      holder.schema = options.routeUser.model.schema
+    } else {
+      holder.db = options.routeTicket.db
+      holder.schema = options.routeTicket.model.schema
+    }
+
+    // d("MAIN", holder.schema)
 
     var aggregator = []
 
     if (req.method == "GET") {
 
-      defaultActionsParser.q(!_.isNil(req.query.q) ? req.query.q : "_id??", aggregator)
+      defaultActionsParser.q(!_.isNil(req.query.q) && req.query.q !== "" ? req.query.q : "_id??", aggregator, req.query.eo)
+
+      defaultActionsParser.p(req.query.p, aggregator)
 
       d("MAIN result", aggregator)
 
@@ -94,11 +118,15 @@ function parseSingleUrlQueryParam(options, options2, aggregateBuilder) {
 
   //     _cliente                  |     nome
   // Schema: Ticket Tipo: ObjectID   Schema: modelSchemaType.options.ref Tipo:   
-  const modelPathFields = options[0].indexOf(".") > 0 ? options[0].split(".") : [options[0]]
-  const modelPathField = options[0]
-  const modelPathFieldType = holder.schema.path(modelPathField)
-  const valore = options2[1]
-  const operators = _.difference(options, options2)
+  let modelPathSuborJoin = options[0].indexOf(".") > 0 ? options[0].split(".") : [options[0]]
+  let modelPathField = options[0]
+  let modelPathFieldType = holder.schema.path(modelPathField)
+  let valore = options2[1]
+  let operators = _.difference(options, options2)
+
+  // Object.assign(m, { ciao: "a" })
+
+  // d("m", m)
 
   // d("parseSingleUrlQueryParamp modelPathFields", modelPathFields)
   // modelPathFields.map((schemaProperty, i) => {
@@ -152,7 +180,25 @@ function parseSingleUrlQueryParam(options, options2, aggregateBuilder) {
   //   aggregateBuilder.push(buildMatchPipelineStage(buildMatchOperator(operators, dictionary[0].key, dictionary[0].value, valore)))
   // }
 
-  aggregateBuilder.push(buildMatchPipelineStage(buildMatchOperator(operators, modelPathField, modelPathFieldType, valore)))
+  updateMatchPipeline(aggregateBuilder, buildMatchOperator(operators, modelPathField, modelPathFieldType, valore))
+
+  modelPathField = null
+  modelPathFieldType = null
+  valore = null
+  operators = null
+}
+
+function parseSingleUrlProjectionParam(options, options2, aggregateBuilder) {
+
+  d("parseSingleUrlProjectionParam", options, options2)
+
+  // let modelPathSuborJoin = options[0].indexOf(".") > 0 ? options[0].split(".") : [options[0]]
+  let modelPathField = options[0]
+  // let modelPathFieldType = holder.schema.path(modelPathField)
+  // let valore = options2[1]
+  // let operators = _.difference(options, options2)
+
+  updateProjectPipeline(aggregateBuilder, modelPathField.toString().trim())
 }
 
 /**
@@ -181,7 +227,7 @@ function buildLookupPipelineStage(fromCollection, localFieldCollection, foreignF
   return l
 }
 
-function buildMatchPipelineStage(matchOperator) {
+function buildMatchPipelineStage(matchOperator, queryOperator) {
 
   var m = {
     $match: {
@@ -189,11 +235,17 @@ function buildMatchPipelineStage(matchOperator) {
     }
   }
 
-  if (matchOperator != undefined && matchOperator != null) {
-    m.$match[Object.keys(matchOperator)[0]] = matchOperator[Object.keys(matchOperator)[0]]
+  if (queryOperator === "and" || queryOperator === undefined || queryOperator === null) {
+    // m.$match["$and"] = [{}]
+    Object.assign(m.$match, { $and: [] })
+  } else {
+    // m.$match.$or = []
+    Object.assign(m.$match, { $or: [] })
   }
 
-  d("buildMatchPipelineStage", matchOperator)
+  if (matchOperator !== undefined && matchOperator !== null) {
+    m.$match[Object.keys(matchOperator)[0]] = matchOperator[Object.keys(matchOperator)[0]]
+  }
 
   return m
 }
@@ -207,6 +259,10 @@ function buildUnwindPipelineStage(modelPathField) {
   // }
 
   return u
+}
+
+function buildProjectPipelineStage() {
+  return { $project: {} }
 }
 
 /**
@@ -258,3 +314,26 @@ function buildMatchOperator(operators, modelPathFieldQuery, modelSchemaType, val
 
 }
 
+function updateMatchPipeline(aggregateBuilder, matchOperator) {
+
+  if (aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$match"] !== undefined)].$match.$and !== undefined) {
+    d("AND")
+    aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$match"] !== undefined)].$match.$and.push(matchOperator)
+
+  } else if (aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$match"] !== undefined)].$match.$or !== undefined) {
+    d("OR")
+    aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$match"] !== undefined)].$match.$or.push(matchOperator)
+
+  }
+}
+
+function updateProjectPipeline(aggregateBuilder, field) {
+
+  let fieldc = {}
+
+  fieldc[field] = 1
+
+  d("updateProjectPipeline", fieldc)
+
+  Object.assign(aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$project"] !== undefined)].$project, fieldc)
+}

@@ -21,7 +21,6 @@ export class TokenInterceptor implements HttpInterceptor {
             req = req.clone({
                 setHeaders: {
                     Authorization: `Bearer ${this.store.selectSnapshot<string>(state => state.auth.token)}`
-
                 }
             });
         }

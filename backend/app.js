@@ -5,8 +5,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoRouteMid = require("./middlewares/routeToMongo")
 
-const ticketsRoutes = require('./routes/tickets');
+const ticketsRoutes = require('./routes/tickets')
 const usersRoutes = require("./routes/users")
+const schemasRoutes = require("./routes/schemas")
 
 const { Ticket } = require("./models/ticket")
 const { PortalUser } = require("./models/portaluser")
@@ -23,7 +24,7 @@ app.use(cookieParser())
 app.use(mongoRouteMid({
   routeUser:
   {
-    routeUrl: "/api/users", schema: PortalUser.schema, model: PortalUser
+    routeUrl: "/api/users", db: db.mongoose, model: PortalUser
   },
   routeTicket:
   {
@@ -46,6 +47,7 @@ app.use((req, resp, next) => {
 
 app.use("/api/tickets", ticketsRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/schema", schemasRoutes);
 
 // app.use((req, resp) => {
 //   resp.sendfile(path.join(__dirname, "mean-course", "index.html"));

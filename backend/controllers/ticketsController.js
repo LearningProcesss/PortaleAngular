@@ -1,10 +1,10 @@
-var { ObjectID } = require("mongodb")
+const { ObjectID } = require("mongodb")
 const { Ticket } = require("../models/ticket")
 const { PortalUser } = require("../models/portaluser")
 const _ = require("lodash")
 const parserz = require('../lib/parserz')
 const PagedResult = require("../viewmodel/pagedresult")
-var d = require('debug')("app:ticketsController")
+const d = require('debug')("app:ticketsController")
 
 exports.getTicket = async (req, resp) => {
 
@@ -38,35 +38,15 @@ exports.getTicket = async (req, resp) => {
 
 exports.getTickets = async (req, resp) => {
 
-    // resp.json(req.mongoroute.aggregatorResult)
+    d("getTickets", JSON.stringify(req.mongoroute.aggregatorResult))
 
     var pagedResult = new PagedResult(1, 1)
-    //pagedResult.setcollection = await Ticket.count()
-    pagedResult.setcollection = await Ticket.aggregate(req.mongoroute.aggregatorResult)
 
-    // pagedResult.setcollection = await Ticket.aggregate([{ $match: { "eventi.creatoDa": { $eq: "Alberto Giachetti" } } }])
-
-    // const pageSize = (_.isNull(req.query.pagesize) || _.isUndefined(req.query.pagesize)) ? 10 : +req.query.pagesize
-
-    // const currentPage = (_.isNull(req.query.page) || _.isUndefined(req.query.page)) ? 1 : +req.query.page
-
-    // const querytecnico = (_.isNull(req.query._tecnico) || _.isUndefined(req.query._tecnico)) ? "" : req.query._tecnico
-
-    // d("tecnico:", querytecnico)
-
-    //  var ret = Ticket.find({ _tecnico: new ObjectID(querytecnico) })
-
-    // if (pageSize && currentPage) {
-    //     ret.skip(pageSize * (currentPage - 1)).limit(pageSize)
-    // }
-
-    // var pageResult = new PagedResult(currentPage, pageSize)
-
-    //  pageResult.setcollection = await ret.populate("_cliente", "nome cognome").populate("_tecnico", "nome cognome")
-
-    // pageResult.count = await ret.count()
-
-    // d("pagedresult", pageResult)
+    try {
+        pagedResult.setcollection = await Ticket.aggregate(req.mongoroute.aggregatorResult)
+    } catch (error) {
+       
+    }
 
     resp.json(pagedResult)
 }

@@ -8,4 +8,6 @@ router.post("/signup", usersCntrl.signup)
 
 router.post("/signin", usersCntrl.signin)
 
+router.get("", usersCntrl.users)
+
 module.exports = router
