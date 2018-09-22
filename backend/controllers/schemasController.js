@@ -7,12 +7,13 @@ const PagedResult = require("../viewmodel/pagedresult")
 var d = require('debug')("app:schemaController")
 
 exports.schemaDefinition = async (req, resp) => {
+
     let schemaPath = {}
 
     if (req.params.tipo === "ticket") {
-        schemaPath[req.params.tipo] = Ticket.schema
+        schemaPath[req.params.tipo + "Schema"] = Ticket.schema.paths
     } else if (req.params.tipo === "user") {
-        schemaPath = PortalUser.schema.path(req.params.path)
+        schemaPath[req.params.tipo] = PortalUser.schema.paths
     }
 
     resp.json(schemaPath)
@@ -38,7 +39,7 @@ exports.schemaPathDefinitionProperty = async (req, resp) => {
     if (req.params.tipo === "ticket") {
         schemaPath[req.params.property] = Ticket.schema.path(req.params.path)[req.params.property]
     } else if (req.params.tipo === "user") {
-        schemaPath = PortalUser.schema.path(req.params.path)[req.params.property]
+        schemaPath[req.params.property] = PortalUser.schema.path(req.params.path)[req.params.property]
     }
 
     resp.json(schemaPath)

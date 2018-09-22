@@ -1,13 +1,17 @@
 const mongoose = require("mongoose");
 
 //TEST ONLY
-// const { Ticket } = require("../models/ticket")
+const { Ticket } = require("../models/ticket")
 // const { PortalUser } = require("../models/portaluser")
 
 mongoose.Promise = global.Promise;
 
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true }).then(() => {
+
+    const ret = Ticket.findById({})
+
     
+
     // Ticket.schema.eachPath((path, pathtype) => {
     //     console.log(path, pathtype);
     // })

@@ -4,7 +4,7 @@ const supertest = require('supertest');
 
 var _id = ""
 
-describe("POST /api/tickets", () => {
+describe("POST /api/portale/tickets", () => {
     it("Crea un nuovo Ticket", (done) => {
 
         const ticketFrontEnd = {

@@ -1,9 +1,13 @@
 const { ObjectID } = require("mongodb")
 const { Ticket } = require("../models/ticket")
 const { PortalUser } = require("../models/portaluser")
+
 const _ = require("lodash")
+const url = require("url")
+
 const parserz = require('../lib/parserz')
 const PagedResult = require("../viewmodel/pagedresult")
+
 const d = require('debug')("app:ticketsController")
 
 exports.getTicket = async (req, resp) => {
@@ -25,7 +29,7 @@ exports.getTicket = async (req, resp) => {
             ret.visualizzatoIl = Date.now()
             ret.visualizzatoDa = portalUser.fullName
 
-            await ret.update();
+            await ret.save();
         }
 
         resp.json(ret)
@@ -45,7 +49,7 @@ exports.getTickets = async (req, resp) => {
     try {
         pagedResult.setcollection = await Ticket.aggregate(req.mongoroute.aggregatorResult)
     } catch (error) {
-       
+
     }
 
     resp.json(pagedResult)
@@ -93,11 +97,6 @@ exports.deleteTicketById = async (req, resp) => {
 
 exports.updateTicket = async (req, resp) => {
 
-    // Ticket.schema.eachPath((path, pathtype) => {
-    //     console.log(path, pathtype);
-
-    // })
-
     if (!ObjectID.isValid(req.params.id)) {
         return resp.status(404).json({
             messaggio: "Non trovato."
@@ -111,6 +110,69 @@ exports.updateTicket = async (req, resp) => {
         const ret = await Ticket.findOneAndUpdate({ _id: req.params.id }, update)
 
         resp.status(200).json({ id: ret._id })
+    } catch (error) {
+        resp.status(500).json({
+            messaggio: error
+        })
+    }
+}
+
+exports.saveEventTicket = async (req, resp) => {
+
+    if (!ObjectID.isValid(req.params.id)) {
+        return resp.status(404).json({
+            messaggio: "Non trovato."
+        })
+    }
+
+    try {
+
+        const ticket = await Ticket.findById({ _id: req.params.id })
+
+        const nuovoEvento = await ticket.eventi.create(req.body.evento)
+
+        await ticket.eventi.push(nuovoEvento)
+
+        const ret2 = await ticket.save()
+
+        d("push", nuovoEvento)
+
+        resp.status(200).json({ id: nuovoEvento._id })
+
+    } catch (error) {
+        resp.status(500).json({
+            messaggio: error
+        })
+    }
+}
+
+exports.saveFileEvent = async (req, resp) => {
+
+    d("saveFileEvent")
+
+    if (!ObjectID.isValid(req.params.id)) {
+        return resp.status(404).json({
+            messaggio: "Non trovato: " + req.params.id
+        })
+    }
+
+    if (!ObjectID.isValid(req.params.idEvento)) {
+        return resp.status(404).json({
+            messaggio: "Non trovato: " + req.params.idEvento
+        })
+    }
+
+    //db.tickets.find({ "eventi._id": ObjectId("5b9d8ad143aef52ed4440165")}, { "eventi.$": 1}).pretty()
+
+    //db.tickets.findOne({_id: ObjectId("5b9ad9e2f168713a08742201")}, { eventi: { $elemMatch: { _id: ObjectId("5b9d8ad143aef52ed4440165") } } })
+
+    try {
+
+        const ticketEvento = await Ticket.findOne({ _id: req.params.id }, { eventi: { $elemMatch: { _id: req.params.idEvento } } })
+
+        console.log(ticketEvento);
+
+        resp.status(200).json({ id: ticketEvento._id })
     } catch (error) {
         resp.status(500).json({
             messaggio: error

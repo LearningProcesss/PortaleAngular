@@ -1,9 +1,18 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-// const uniqueValidator = require("mongoose-unique-validator")
+const uniqueValidator = require("mongoose-unique-validator")
 
 var d = require('debug')("app:PortalUserSchema")
+
+// const aziendaSchema = new mongoose.Schema({
+//     propAA: {
+//         type: String
+//     },
+//     propBB: {
+//         type: Number
+//     }
+// })
 
 const schema = mongoose.Schema({
     nome: {
@@ -36,12 +45,26 @@ const schema = mongoose.Schema({
     tipo: {//0 utente 1 tecnico
         type: Number
     },
-    _azienda: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Azienda'
-        // ,
-        // required: true
+    azienda: {
+        _id: {
+            type: mongoose.Schema.Types.ObjectId,
+            auto: true
+        },
+        ragioneSociale: {
+            type: String,
+            required: true
+        },
+        indirizzo: {
+            type: String
+        }
+
     }
+    // _azienda: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Azienda'
+    //     // ,
+    //     // required: true
+    // }
 });
 
 schema.methods.compara = async function (passwordFrom) {
@@ -50,7 +73,7 @@ schema.methods.compara = async function (passwordFrom) {
 
     try {
         var ret = await bcrypt.compare(passwordFrom, portaluser.password);
-        d("compara", ret)
+        // d("compara", ret)
         return ret;
     } catch (error) {
         d("compara", error)
@@ -66,7 +89,7 @@ schema.methods.creaToken = function () {
             email: portaluser.email, id: portaluser._id
         }, process.env.JWT_SECRET, { expiresIn: "12h" })
 
-        d("creaToken", token)
+        // d("creaToken", token)
         return token;
     } catch (error) {
         d("creaToken", error)
@@ -82,7 +105,7 @@ schema.statics.trovaByToken = async function (tokenFrom) {
     try {
 
         decoded = jwt.verify(tokenFrom, process.env.JWT_SECRET);
-        d("trovaByToken", decoded)
+        // d("trovaByToken", decoded)
         if (_.isNull(decoded) || _.isUndefined(decoded)) {
             return await new Promise((resolve, reject) => {
                 resolve(null)
@@ -109,7 +132,7 @@ schema.pre("save", function (next) {
 
     bcrypt.genSalt(5).then((salt) => {
         bcrypt.hash(portaluser.password, salt).then((hash) => {
-            d("pre", salt)
+            // d("pre", salt)
             portaluser.password = hash;
             next();
         }).catch((error) => {

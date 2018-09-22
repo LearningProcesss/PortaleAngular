@@ -4,10 +4,13 @@ const uniqueValidator = require("mongoose-unique-validator")
 var d = require('debug')("app:AziendaSchema")
 
 const schema = mongoose.Schema({
-    nome: {
+    ragioneSociale: {
         type: String,
         required: true,
         unique: true
+    },
+    indirizzo: {
+        type: String
     }
 })
 

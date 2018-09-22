@@ -27,6 +27,23 @@ const defaultActionsParser = {
 
       divide(requestProjectionString).map(singleRawPrm => parseSingleUrlProjectionParam(singleRawPrm.split(regDividePrm.options), singleRawPrm.split(regDividePrm.options2), aggregateBuilder))
     }
+  },
+  s: function (requestSortString, aggregateBuilder) {
+    if (!_.isNil(requestSortString)) {
+
+      aggregateBuilder.push({ $sort: {} })
+      d("defaultActionsParser", requestSortString)
+      divide(requestSortString).map(singleRawPrm => parseSignleUrlSortParam(singleRawPrm, aggregateBuilder))
+
+    }
+  },
+  l: function(requestLimitString, aggregateBuilder) {
+    if (!_.isNil(requestLimitString)) {
+
+      d("defaultActionsParser", requestLimitString)
+
+      aggregateBuilder.push({ $limit: +requestLimitString })
+    }
   }
 }
 
@@ -60,6 +77,8 @@ module.exports = function (options) {
     d("MAIN request", req.method)
     d("MAIN query", req.query.q)
     d("MAIN projection", req.query.p)
+    d("MAIN sort", req.query.s)
+    d("MAIN limit", req.query.l)
     d("MAIN equality match operator", req.query.eo)
 
     let parsed = url.parse(req.url)
@@ -83,6 +102,10 @@ module.exports = function (options) {
       defaultActionsParser.q(!_.isNil(req.query.q) && req.query.q !== "" ? req.query.q : "_id??", aggregator, req.query.eo)
 
       defaultActionsParser.p(req.query.p, aggregator)
+
+      defaultActionsParser.s(req.query.s, aggregator)
+
+      defaultActionsParser.l(req.query.l, aggregator)
 
       d("MAIN result", aggregator)
 
@@ -123,6 +146,10 @@ function parseSingleUrlQueryParam(options, options2, aggregateBuilder) {
   let modelPathFieldType = holder.schema.path(modelPathField)
   let valore = options2[1]
   let operators = _.difference(options, options2)
+
+  if (modelPathSuborJoin.length > 1) {
+    modelPathFieldType = holder.schema.path(modelPathSuborJoin[0])
+  }
 
   // Object.assign(m, { ciao: "a" })
 
@@ -199,6 +226,12 @@ function parseSingleUrlProjectionParam(options, options2, aggregateBuilder) {
   // let operators = _.difference(options, options2)
 
   updateProjectPipeline(aggregateBuilder, modelPathField.toString().trim())
+}
+
+function parseSignleUrlSortParam(options, aggregateBuilder) {
+  d("parseSignleUrlSortParam", options)
+
+  updateSortPipeline(aggregateBuilder, options.replace("asc", "").replace("desc").trim(), options.indexOf("asc") > 0 ? 1 : options.indexOf("desc") > 0 ? -1 : 1)
 }
 
 /**
@@ -336,4 +369,21 @@ function updateProjectPipeline(aggregateBuilder, field) {
   d("updateProjectPipeline", fieldc)
 
   Object.assign(aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$project"] !== undefined)].$project, fieldc)
+}
+
+/**
+ * 
+ * @param {object} aggregateBuilder 
+ * @param {string} field 
+ * @param {int} order 
+ */
+function updateSortPipeline(aggregateBuilder, field, order) {
+
+  let fieldc = {}
+
+  fieldc[field] = order
+
+  d("updateSortPipeline", field, fieldc, order)
+
+  Object.assign(aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$sort"] !== undefined)].$sort, fieldc)
 }

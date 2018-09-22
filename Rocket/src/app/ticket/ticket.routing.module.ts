@@ -10,6 +10,9 @@ const routes: Routes = [
         path: '', component: TableListComponent
     },
     {
+        path: '/new', component: DetailComponent
+    },
+    {
         path: ':id', component: DetailComponent
     }
 ];

@@ -1,3 +1,38 @@
-<p>
-  detail works!
-</p>
+<form [formGroup]="ticketFormGroup" (ngSubmit)="salvaFormSubmit()">
+    <mat-form-field appearance="outline">
+        <mat-label>Titolo</mat-label>
+        <input matInput placeholder="Titolo" formControlName="ticketFormTitolo">
+        <mat-icon matSuffix>sentiment_very_satisfied</mat-icon>
+    </mat-form-field>
+    <mat-form-field>
+        <mat-select placeholder="Task" formControlName="ticketFormTask">
+            <mat-option *ngFor="let task of $tasks | async" [value]="task"> {{task}} </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+        <mat-select placeholder="Prio" formControlName="ticketFormPrio">
+            <mat-option *ngFor="let prio of $prios | async" [value]="prio"> {{prio}} </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+        <input type="text" placeholder="Cliente" matInput formControlName="ticketFormCliente" [matAutocomplete]="autoC" name="test">
+        <mat-autocomplete autoActiveFirstOption #autoC="matAutocomplete" name="testC">
+            <mat-option *ngFor="let utente of $filteredPortalUserOptions | async" [value]="utente.cognome + ' ' + utente.nome" (onSelectionChange)="selezioneCliente($event, utente)">
+                {{ utente.cognome }} {{ utente.nome }}
+            </mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+    <mat-form-field>
+        <input type="text" placeholder="Tecnico assegnato" matInput formControlName="ticketFormTecnico" [matAutocomplete]="autoT">
+        <mat-autocomplete autoActiveFirstOption #autoT="matAutocomplete">
+            <mat-option *ngFor="let utente of $filteredTecnicoOptions | async" [value]="utente.cognome + ' ' + utente.nome" (onSelectionChange)="selezioneTecnico($event, utente)">
+                {{ utente.cognome }} {{ utente.nome }}
+            </mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+    <mat-form-field class="">
+        <textarea matInput formControlName="ticketFormEventoText" placeholder="Leave a comment"></textarea>
+    </mat-form-field>
+    <image-upload buttonCaption="" dropBoxMessage="" clearButtonCaption="" max="1" (uploadFinished)="onUploadFinished($event)"></image-upload>
+    <button type="submit" mat-raised-button color="warn">Salva</button>
+</form>

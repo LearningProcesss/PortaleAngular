@@ -29,4 +29,10 @@ export class SignupAction {
     constructor(public readonly payload?: AuthTransportData) { }
 }
 
+export class QueryPortalUsersAction {
+    static readonly type = '[AUTH] QueryPortalUsersAction';
+    constructor(public readonly payload?: { q: string[] }) {}
+}
+
+
 

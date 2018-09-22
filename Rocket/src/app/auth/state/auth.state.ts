@@ -3,9 +3,11 @@ import { Navigate } from '@ngxs/router-plugin';
 import { CookieService } from 'ngx-cookie-service';
 import { AuthStateModel, AuthTransportData } from '../authdatatrasnport';
 import { AuthDataCache } from '../authdatacache';
-import { LoginAction, LoginSuccesfull } from './auth.actions';
-import { HttpClient } from '@angular/common/http';
+import { LoginAction, LoginSuccesfull, QueryPortalUsersAction } from './auth.actions';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { PagedResult } from '../../pagedResult';
+import { IUser, UserClass } from '../../user/user';
 
 @State<AuthStateModel>({
     name: "auth"
@@ -43,6 +45,11 @@ export class AuthState {
         return state.uid;
     }
 
+    @Selector()
+    static getPortalUser(state: AuthStateModel) {
+        return state.users;
+    }
+
     @Action(LoginAction)
     doLogin(ctx: StateContext<AuthStateModel>, action: LoginAction) {
 
@@ -68,7 +75,7 @@ export class AuthState {
                 ctx.dispatch(new LoginSuccesfull({ nome: this.authCache.fullname, id: this.authCache.userId }));
             }
         } else {
-            this.http.post(environment.api + "users/signin", { email: action.payload.email, password: action.payload.password })
+            this.http.post(environment.api + "auth/signin", { email: action.payload.email, password: action.payload.password })
                 .subscribe((response: AuthTransportData) => {
 
                     ctx.patchState(
@@ -97,6 +104,21 @@ export class AuthState {
     onLoginSuccess(ctx: StateContext<AuthStateModel>, action: LoginSuccesfull) {
         ctx.dispatch(new Navigate(['/tickets']));
     }
+
+    @Action(QueryPortalUsersAction)
+    queryPortalUsers(ctx: StateContext<AuthStateModel>, action: QueryPortalUsersAction) {
+
+        let q = action.payload.q.join(",");
+
+        var queryParams = new HttpParams().set("q", q);
+
+        this.http.get<PagedResult<UserClass>>(environment.api + "/users", { params: queryParams }).subscribe(result => {
+            ctx.patchState({
+                users: result.collection
+            });
+        });
+    }
+
 
     private setTimer(durata: number) {
 

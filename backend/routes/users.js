@@ -1,13 +1,9 @@
 const express = require('express');
-// const middleWareUser = require("../middleware/user-checker");
-const usersCntrl = require("../controllers/portalUserController");
+const portalUsersMiddleware = require("../middlewares/portalUsersMiddleware")
+const usersCntrl = require("../controllers/usersController");
 
 const router = express.Router()
 
-router.post("/signup", usersCntrl.signup)
-
-router.post("/signin", usersCntrl.signin)
-
-router.get("", usersCntrl.users)
+router.get("", portalUsersMiddleware, usersCntrl.users)
 
 module.exports = router

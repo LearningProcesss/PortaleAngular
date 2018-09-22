@@ -35,26 +35,6 @@ var TicketSchema = mongoose.Schema({
         default: 'Altro',
         required: true
     },
-    // _idPrio: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Prio'
-    // },
-    // _idTask: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Task'
-    // },
-    // _idCliente: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Cliente'
-    // },
-    // _idTecnico: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Tecnico'
-    // },
-    // _idStato: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Stato'
-    // },
     creatoIl: {
         type: Date,
         default: Date.now()

@@ -4,8 +4,12 @@ class PagedResult {
         this.pageSize = pageSize;
     }
 
+    /**
+     * collection any[]
+     */
     set setcollection(collection) {
-        this.collection = collection;
+        this.collection = collection
+        this.count = this.collection.length
     }
 
     set setcount(count) {

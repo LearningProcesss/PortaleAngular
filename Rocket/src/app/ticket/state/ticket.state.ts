@@ -1,11 +1,12 @@
 import { State, Action, StateContext, Selector } from '@ngxs/store';
-import { Ticket, PagedResult } from '../ticket';
+import { ITicket } from '../ticket';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { TicketListGetAction, TicketListReturnGetAction, TicketListGetActionQuery } from './ticket.actions';
+import { TicketListGetAction, TicketListReturnGetAction, TicketListGetActionQuery, TicketSaveAction } from './ticket.actions';
+import { PagedResult } from '../../pagedResult';
 
 export interface TicketStateModel {
-    tickets: Ticket[];
+    tickets: ITicket[];
 }
 
 @State<TicketStateModel>({
@@ -26,15 +27,15 @@ export class TicketState {
     constructor(private httpclient: HttpClient) {
 
     }
-    
+
     @Action(TicketListGetActionQuery)
     getTicketsQuery(ctx: StateContext<TicketStateModel>, action: TicketListGetActionQuery) {
         let q = action.payload.q.join(",");
 
         var queryParams = new HttpParams().set("q", q);
 
-        this.httpclient.get<PagedResult>(this.stateApiUrl, { params: queryParams })
-            .subscribe((result) => {
+        this.httpclient.get<PagedResult<ITicket>>(this.stateApiUrl, { params: queryParams })
+            .subscribe(result => {
                 ctx.patchState({
                     tickets: result.collection
                 });
@@ -43,31 +44,43 @@ export class TicketState {
             });
     }
 
+    @Action(TicketSaveAction)
+    saveTicket(ctx: StateContext<TicketStateModel>, action: TicketSaveAction) {
 
+        let data = new FormData();
 
-    @Action(TicketListGetAction)
-    getTickets(ctx: StateContext<TicketStateModel>, action: TicketListGetAction) {
+        data.append("titolo", action.payload.ticket.titolo);
+        data.append("_cliente", action.payload.ticket._cliente);
+        data.append("_tecnico", action.payload.ticket._tecnico);
+        data.append("task", action.payload.ticket.task);
+        data.append("stato", action.payload.ticket.stato);
+        data.append("prio", action.payload.ticket.prio);
 
-        // let search = new URLSearchParams();
+        if(action.payload.file != null) {
+            data.append("uploadEventFile", action.payload.file);
+        }
+        
+        this.httpclient.post(this.stateApiUrl, data).subscribe(resp => {
+            console.log("saveTicket", resp);
+        });
 
-        // search.set("q", "_tecnico=" + action.payload._tecnico);
-
-        var queryParams = new HttpParams().set("q", "_tecnico=" + action.payload._tecnico.toString());
-
-        this.httpclient.get<PagedResult>(this.stateApiUrl, { params: queryParams })
-            // .pipe(
-            //     map((pagedResult) => { return of(pagedResult.collection) })
-            // )
-            .subscribe((result) => {
-                ctx.patchState({
-                    tickets: result.collection
-                });
-                // console.log(ctx.getState());
-                //ctx.dispatch(new TicketListReturnGetAction())
-            }, (error) => {
-
-            });
     }
+
+
+    // @Action(TicketListGetAction)
+    // getTickets(ctx: StateContext<TicketStateModel>, action: TicketListGetAction) {
+
+    //     var queryParams = new HttpParams().set("q", "_tecnico=" + action.payload._tecnico.toString());
+
+    //     this.httpclient.get<PagedResult<Ticket>>(this.stateApiUrl, { params: queryParams })
+    //         .subscribe((result) => {
+    //             ctx.patchState({
+    //                 tickets: result.collection
+    //             });
+    //         }, (error) => {
+
+    //         });
+    // }
 
 
 }

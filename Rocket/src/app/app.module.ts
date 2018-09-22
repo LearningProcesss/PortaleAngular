@@ -17,10 +17,8 @@ import { AuthState } from './auth/state/auth.state';
 
 import { CookieService } from 'ngx-cookie-service';
 import { HeadermaterialComponent } from './headermaterial/headermaterial.component';
-
-// import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule } from '@angular/material';
-
-
+import { InputComponent } from './schema/components/input/input.component';
+import { UserState } from './user/state/user.state';
 
 @NgModule({
   imports: [
@@ -28,20 +26,15 @@ import { HeadermaterialComponent } from './headermaterial/headermaterial.compone
     BrowserModule,//importantissimo!
     BrowserAnimationsModule,
     AppRoutingModule,
-    NgxsModule.forRoot([TicketState, AuthState]),
+    NgxsModule.forRoot([TicketState, AuthState, UserState]),
     NgxsRouterPluginModule.forRoot(),
     MaterialModule,
     HttpClientModule
-    // LayoutModule,
-    // MatToolbarModule,
-    // MatButtonModule,
-    // MatSidenavModule,
-    // MatIconModule,
-    // MatListModule
   ],
   declarations: [
     AppComponent,
-    HeadermaterialComponent
+    HeadermaterialComponent,
+    InputComponent
   ],
   providers: [
     CookieService,

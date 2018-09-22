@@ -1,16 +1,23 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator, MatSort } from '@angular/material';
+import { MatPaginator, MatSort, MatAutocompleteSelectedEvent, MatSelectChange } from '@angular/material';
 import { TableListDataSource } from './table-list-datasource';
 
-import { Store, Select, Actions } from '@ngxs/store';
+import { Store, Select } from '@ngxs/store';
 import { TicketListGetActionQuery } from '../state/ticket.actions';
-import { AuthState } from '../../auth/state/auth.state';
 import { TicketState } from '../state/ticket.state';
+import { UserState } from '../../user/state/user.state';
+import { AuthState } from '../../auth/state/auth.state';
 
 import { Observable } from 'rxjs';
+import { map, startWith, filter, switchMap } from 'rxjs/operators';
 
-import { Ticket } from '../ticket';
-import { NgForm } from '@angular/forms';
+import { NgForm, FormControl, FormGroup, FormBuilder } from '@angular/forms';
+import { SchemaService } from '../../schema/schema.service';
+import { IUser, UserClass } from '../../user/user';
+import { ITicket } from '../ticket';
+import { UserListGetActionQuery } from '../../user/state/user.actions';
+import { Event } from '@angular/router';
+
 
 @Component({
   selector: 'app-ticket/table-list',
@@ -23,14 +30,36 @@ export class TableListComponent implements OnInit {
   dataSource: TableListDataSource;
 
   @Select(TicketState.getTickets)
-  $tickets: Observable<Ticket[]>;
+  $tickets: Observable<ITicket[]>;
+
+  @Select(UserState.getUsers)
+  $users: Observable<IUser[]>;
+
+  reactiveFilterForm: FormGroup;
 
   private qValues: string[] = [];
+
+  private selectedIdCliente = "";
+  private selectedIdTecnico = "";
+
+  $filteredPortalUserOptions: Observable<IUser[]>;
+  $filteredTecnicoOptions: Observable<IUser[]>;
 
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
   displayedColumns = ['_id', 'titolo'];
 
   constructor(private store: Store) {
+
+    this.reactiveFilterForm = new FormGroup(
+      {
+        reactiveFilterNumeroTicket: new FormControl(),
+        reactiveFilterDataAperturaRangeStart: new FormControl(),
+        reactiveFilterDataAperturaRangeEnd: new FormControl({ value: new Date(), disabled: false }),
+        reactiveFilterFullText: new FormControl(),
+        reactiveFilterCliente: new FormControl(),
+        reactiveFilterTecnico: new FormControl()
+      }
+    );
 
   }
 
@@ -42,23 +71,54 @@ export class TableListComponent implements OnInit {
     this.qValues.push("stato=Aperto");
 
     this.store.dispatch(new TicketListGetActionQuery({ q: this.qValues }));
+    this.store.dispatch(new UserListGetActionQuery({ q: [] }));
 
-    this.$tickets.subscribe((retTickets: Ticket[]) => {
+    this.$tickets.subscribe((retTickets: ITicket[]) => {
 
       this.dataSource = new TableListDataSource(this.paginator, this.sort);
 
       this.dataSource.data = retTickets;
     });
 
+    this.$filteredPortalUserOptions = this.reactiveFilterForm.get("reactiveFilterCliente").valueChanges.pipe(
+      startWith(''),
+      switchMap(text => {
+        return this.$users.pipe(map(u => u.filter(usr => usr.nome.toLowerCase().includes(text.toLowerCase()) || usr.cognome.toLowerCase().includes(text.toLowerCase()))))
+      }));
+
+    this.$filteredTecnicoOptions = this.reactiveFilterForm.get("reactiveFilterTecnico").valueChanges.pipe(
+      startWith(''),
+      switchMap(text => {
+        return this.$users.pipe(map(u => u.filter(usr => usr.tipo === 1 && (usr.nome.toLowerCase().includes(text.toLowerCase()) || usr.cognome.toLowerCase().includes(text.toLowerCase())))))
+      }));
+
     this.qValues = [];
   }
 
-  eseguiRicerca(filterForm: NgForm) {
+  // eseguiRicerca(filterForm: NgForm) {
 
-    this.qValues.push("titolo~" + filterForm.value.fullText);
+  //   console.log(filterForm.value);
 
-    this.store.dispatch(new TicketListGetActionQuery({ q: this.qValues }));
 
-    this.qValues = [];
+  //   if (filterForm.value.fullText != "") {
+  //     this.qValues.push("titolo~" + filterForm.value.fullText);
+  //   }
+
+  //   this.store.dispatch(new TicketListGetActionQuery({ q: this.qValues }));
+
+  //   this.qValues = [];
+  // }
+
+  reactiveFilterFormSubmit() {
+    console.log(this.reactiveFilterForm.value);
+
+  }
+
+
+  selezioneCliente(event: MatSelectChange, obj: IUser) {
+    this.selectedIdCliente = obj._id;
+  }
+  selezioneTecnico(event: MatSelectChange, obj: IUser) {
+    this.selectedIdTecnico = obj._id;
   }
 }
