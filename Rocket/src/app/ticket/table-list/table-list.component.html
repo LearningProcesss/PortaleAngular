@@ -4,7 +4,7 @@
 
     </mat-panel-title>
     <mat-panel-description>
-      Filtri
+      Cerca nel portale
     </mat-panel-description>
     <mat-icon>account_circle</mat-icon>
   </mat-expansion-panel-header>
@@ -41,14 +41,17 @@
         <mat-datepicker-toggle matSuffix [for]="dp4"></mat-datepicker-toggle>
         <mat-datepicker #dp4 disabled="false"></mat-datepicker>
       </mat-form-field>
-      <button type="submit" mat-raised-button color="warn">Cerca</button>
+      <!-- <button type="submit" mat-raised-button color="warn">Cerca</button> -->
     </form>
   </ng-template>
-  <!-- <mat-action-row>
-    
-  </mat-action-row> -->
+  <mat-action-row>
+    <button type="submit" mat-raised-button color="warn" (click)="reactiveFilterFormSubmit()" >Cerca</button>
+  </mat-action-row>
 </mat-expansion-panel>
-
+<!-- <a [routerLink]="['new']">Tickets</a> -->
+<mat-form-field>
+  <input matInput (keyup)="filterTable($event.target.value)" placeholder="Filter">
+</mat-form-field>
 <div class="mat-elevation-z8 data-table">
   <table mat-table #table [dataSource]="dataSource" matSort aria-label="Elements">
     <!-- Id Column -->
@@ -70,3 +73,4 @@
   <mat-paginator #paginator [length]="dataSource.data.length" [pageIndex]="0" [pageSize]="50" [pageSizeOptions]="[25, 50, 100, 250]">
   </mat-paginator>
 </div>
+<!-- <router-outlet></router-outlet> -->

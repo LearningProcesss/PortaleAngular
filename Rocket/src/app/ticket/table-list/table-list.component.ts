@@ -42,6 +42,8 @@ export class TableListComponent implements OnInit {
   private selectedIdCliente = "";
   private selectedIdTecnico = "";
 
+  private called = false;
+
   $filteredPortalUserOptions: Observable<IUser[]>;
   $filteredTecnicoOptions: Observable<IUser[]>;
 
@@ -68,17 +70,22 @@ export class TableListComponent implements OnInit {
     const idUtente = this.store.selectSnapshot<String>(AuthState.authStateId);
 
     this.qValues.push("_tecnico=" + idUtente);
-    this.qValues.push("stato=Aperto");
+    this.qValues.push("stato!=Chiuso");
+
 
     this.store.dispatch(new TicketListGetActionQuery({ q: this.qValues }));
     this.store.dispatch(new UserListGetActionQuery({ q: [] }));
 
     this.$tickets.subscribe((retTickets: ITicket[]) => {
+      console.log("INIT:", retTickets);
 
       this.dataSource = new TableListDataSource(this.paginator, this.sort);
 
       this.dataSource.data = retTickets;
     });
+
+
+
 
     this.$filteredPortalUserOptions = this.reactiveFilterForm.get("reactiveFilterCliente").valueChanges.pipe(
       startWith(''),
@@ -109,6 +116,9 @@ export class TableListComponent implements OnInit {
   //   this.qValues = [];
   // }
 
+  filterTable(realtimeFiler: string) {
+
+  }
   reactiveFilterFormSubmit() {
     console.log(this.reactiveFilterForm.value);
 

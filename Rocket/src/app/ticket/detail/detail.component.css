@@ -1,0 +1,10 @@
+#ticketForm {
+    margin: 10px 20px 10px 10px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
+.longFieldOneLine {
+    margin: 10px 10px 1px 10px;
+    width: 95%;
+}
+

@@ -4,7 +4,8 @@ var cookieParser = require('cookie-parser')
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoRouteMid = require("./middlewares/routeToMongo")
-const path = require('path');
+const path = require('path')
+const d = require('debug')("app:app")
 
 const ticketsRoutes = require('./routes/tickets')
 const authRoutes = require("./routes/auth")
@@ -16,8 +17,9 @@ const { PortalUser } = require("./models/portaluser")
 
 const app = express();
 
+d('path /uploads: %s', path.join(__dirname, './public/images/portaleuploads'))
 
-app.use("/portaleuploads", express.static(path.join('public')));
+app.use("/uploads", express.static(path.join(__dirname, 'public/images/portaleuploads')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

@@ -13,6 +13,8 @@ import { MatSelectChange } from '@angular/material';
 import { FileHolder } from 'angular2-image-upload';
 import { TicketSaveAction } from '../state/ticket.actions';
 import { AuthState } from '../../auth/state/auth.state';
+import { TicketState } from '../state/ticket.state';
+import { ActivatedRoute, Params } from '@angular/router';
 
 
 
@@ -29,25 +31,33 @@ export class DetailComponent implements OnInit {
 
   $tasks: Observable<string[]>;
   $prios: Observable<string[]>;
-
-  @Select(UserState.getUsers)
-  $users: Observable<IUser[]>;
+  $statos: Observable<string[]>;
   $filteredPortalUserOptions: Observable<IUser[]>;
   $filteredTecnicoOptions: Observable<IUser[]>;
+  @Select(UserState.getUsers) $users: Observable<IUser[]>;
+  @Select(TicketState.getLastEventoCreatoInSessione) $evento: Observable<IEvento>;
   private selectedIdCliente = "";
   private selectedIdTecnico = "";
 
   private selectedFile: File;
 
-  constructor(private store: Store, private schemaService: SchemaService) {
+  constructor(private store: Store, private schemaService: SchemaService, private route: ActivatedRoute) {
 
   }
 
   ngOnInit() {
 
+    // this.route.params.subscribe((p: Params) => {
+    //   if (p['id'] != "0") {
+
+    //   }
+    // });
+
     this.$tasks = this.schemaService.getSchemaPathProperty<IStringFieldEnum>("ticket", "task", "enumValues").pipe(map((m: IStringFieldEnum) => m.enumValues));
 
     this.$prios = this.schemaService.getSchemaPathProperty<IStringFieldEnum>("ticket", "prio", "enumValues").pipe(map((m: IStringFieldEnum) => m.enumValues));
+
+    this.$statos = this.schemaService.getSchemaPathProperty<IStringFieldEnum>("ticket", "stato", "enumValues").pipe(map((m: IStringFieldEnum) => m.enumValues));
 
     this.ticketFormGroup = new FormGroup(
       {
@@ -57,7 +67,8 @@ export class DetailComponent implements OnInit {
         ticketFormPrio: new FormControl(),
         ticketFormCliente: new FormControl(),
         ticketFormProcad: new FormControl(),
-        ticketFormTecnico: new FormControl()
+        ticketFormTecnico: new FormControl(),
+        ticketFormStato: new FormControl()
       }
     );
 
@@ -93,14 +104,13 @@ export class DetailComponent implements OnInit {
 
       const nomeUtente = this.store.selectSnapshot<string>(AuthState.authStateNome);
 
-      console.log(nomeUtente);
-
       const nuovoTicket: ITicket = {
         titolo: this.ticketFormGroup.get("ticketFormTitolo").value + "",
         _cliente: this.selectedIdCliente,
         _tecnico: this.selectedIdTecnico,
         task: this.ticketFormGroup.get("ticketFormTask").value,
-        prio: this.ticketFormGroup.get("ticketFormPrio").value
+        prio: this.ticketFormGroup.get("ticketFormPrio").value,
+        stato: this.ticketFormGroup.get("ticketFormStato").value
         // eventi: [{
         //   testo: this.ticketFormGroup.get("ticketFormTitolo").value,
         //   creatoDa: nomeUtente
@@ -112,10 +122,12 @@ export class DetailComponent implements OnInit {
         creatoDa: nomeUtente
       };
 
-      this.store.dispatch(new TicketSaveAction({ ticket: nuovoTicket, evento: evento, file: this.selectedFile }));
-    } catch (error) {
-console.log(error);
+      this.store.dispatch(new TicketSaveAction({ ticket: nuovoTicket, evento: evento, file: this.selectedFile })).subscribe(response => {
+        console.log("LOG dispatch", response);
+      });
 
+    } catch (error) {
+      console.log(error);
     }
 
 

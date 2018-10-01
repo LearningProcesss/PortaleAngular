@@ -11,7 +11,7 @@ router.get("", portalUsersMiddleware, ticketsCntrl.getTickets)
 
 router.post("", portalUsersMiddleware, filesMiddleware, ticketsCntrl.saveTicket)
 
-router.post("/:id", portalUsersMiddleware, ticketsCntrl.saveEventTicket)
+router.post("/:id", portalUsersMiddleware, filesMiddleware, ticketsCntrl.saveEventTicket)
 
 router.delete("/:id", portalUsersMiddleware, ticketsCntrl.deleteTicketById)
 

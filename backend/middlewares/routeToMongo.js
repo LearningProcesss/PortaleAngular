@@ -32,7 +32,7 @@ const defaultActionsParser = {
     if (!_.isNil(requestSortString)) {
 
       aggregateBuilder.push({ $sort: {} })
-      d("defaultActionsParser", requestSortString)
+      // d("defaultActionsParser", requestSortString)
       divide(requestSortString).map(singleRawPrm => parseSignleUrlSortParam(singleRawPrm, aggregateBuilder))
 
     }
@@ -40,7 +40,7 @@ const defaultActionsParser = {
   l: function(requestLimitString, aggregateBuilder) {
     if (!_.isNil(requestLimitString)) {
 
-      d("defaultActionsParser", requestLimitString)
+      // d("defaultActionsParser", requestLimitString)
 
       aggregateBuilder.push({ $limit: +requestLimitString })
     }
@@ -63,7 +63,7 @@ const defaultDataTypeConverters = {
 
 const regDividePrm = {
   options: /(<|=|>|!|\$|\^|~|\?)/g,
-  options2: /\b(?:[<>]=?|=|\$|\^|~|\?)\b/g
+  options2: /\b(?:[<>]=?|!|=|!=|\$|\^|~|\?)\b/g
 }
 
 let holder = {
@@ -74,16 +74,14 @@ let holder = {
 module.exports = function (options) {
 
   return function (req, res, next) {
-    d("MAIN request", req.method)
-    d("MAIN query", req.query.q)
-    d("MAIN projection", req.query.p)
-    d("MAIN sort", req.query.s)
-    d("MAIN limit", req.query.l)
-    d("MAIN equality match operator", req.query.eo)
+    // d("MAIN request", req.method)
+    // d("MAIN query", req.query.q)
+    // d("MAIN projection", req.query.p)
+    // d("MAIN sort", req.query.s)
+    // d("MAIN limit", req.query.l)
+    // d("MAIN equality match operator", req.query.eo)
 
     let parsed = url.parse(req.url)
-
-    console.log("parsed", parsed);
 
     if (parsed.pathname === options.routeUser.routeUrl) {
       holder.db = options.routeUser.db
@@ -107,7 +105,7 @@ module.exports = function (options) {
 
       defaultActionsParser.l(req.query.l, aggregator)
 
-      d("MAIN result", aggregator)
+      // d("MAIN result", aggregator)
 
       req.mongoroute = { aggregatorResult: aggregator }
     }
@@ -137,10 +135,8 @@ function divide(query) {
  */
 function parseSingleUrlQueryParam(options, options2, aggregateBuilder) {
 
-  d("parseSingleUrlQueryParam", options, options2)
+  // d("parseSingleUrlQueryParam", options, options2)
 
-  //     _cliente                  |     nome
-  // Schema: Ticket Tipo: ObjectID   Schema: modelSchemaType.options.ref Tipo:   
   let modelPathSuborJoin = options[0].indexOf(".") > 0 ? options[0].split(".") : [options[0]]
   let modelPathField = options[0]
   let modelPathFieldType = holder.schema.path(modelPathField)
@@ -307,7 +303,7 @@ function buildProjectPipelineStage() {
  */
 function buildMatchOperator(operators, modelPathFieldQuery, modelSchemaType, value) {
 
-  d("buildMatchOperator", modelPathFieldQuery, modelSchemaType)
+  // d("buildMatchOperator", operators, value)
 
   if (operators[0] == "=" && operators.length == 1) {
     return { [modelPathFieldQuery]: { $eq: defaultDataTypeConverters[modelSchemaType["instance"].toLowerCase()](value) } }
@@ -317,7 +313,7 @@ function buildMatchOperator(operators, modelPathFieldQuery, modelSchemaType, val
     return { [modelPathFieldQuery]: { $lt: defaultDataTypeConverters[modelSchemaType["instance"].toLowerCase()](value) } }
   } else if (operators[0] == "<" && operators.length == 3 && operators[2] == "=") {
     return { [modelPathFieldQuery]: { $lte: defaultDataTypeConverters[modelSchemaType["instance"].toLowerCase()](value) } }
-  } else if (operators[0] == "!" && operators.length == 3 && operators[2] == "=") {
+  } else if (operators[0] == "!" && operators.length > 1 && operators[2] == "=") {
     return { [modelPathFieldQuery]: { $ne: defaultDataTypeConverters[modelSchemaType["instance"].toLowerCase()](value) } }
   } else if (operators[0] == ">" && operators.length == 3 && operators[2] == "=") {
     return { [modelPathFieldQuery]: { $gte: defaultDataTypeConverters[modelSchemaType["instance"].toLowerCase()](value) } }
@@ -350,11 +346,9 @@ function buildMatchOperator(operators, modelPathFieldQuery, modelSchemaType, val
 function updateMatchPipeline(aggregateBuilder, matchOperator) {
 
   if (aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$match"] !== undefined)].$match.$and !== undefined) {
-    d("AND")
     aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$match"] !== undefined)].$match.$and.push(matchOperator)
 
   } else if (aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$match"] !== undefined)].$match.$or !== undefined) {
-    d("OR")
     aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$match"] !== undefined)].$match.$or.push(matchOperator)
 
   }

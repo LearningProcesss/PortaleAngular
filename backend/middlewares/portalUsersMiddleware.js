@@ -14,11 +14,11 @@ module.exports = async (req, resp, next) => {
 
         const tokenFrom = req.headers.authorization.split(" ")[1]
 
-        d("func", req.headers.authorization)
+        // d("func", req.headers.authorization)
 
         const utente = await PortalUser.trovaByToken(tokenFrom)
 
-        d("func", (!_.isNull(utente) && !_.isUndefined(utente)) ? utente._id : -1)
+        // d("func", (!_.isNull(utente) && !_.isUndefined(utente)) ? utente._id : -1)
 
         if (!_.isNull(utente) && !_.isUndefined(utente)) {
 

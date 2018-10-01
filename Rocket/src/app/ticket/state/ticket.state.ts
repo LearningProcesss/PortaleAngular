@@ -1,18 +1,25 @@
 import { State, Action, StateContext, Selector } from '@ngxs/store';
-import { ITicket } from '../ticket';
+import { ITicket, IEvento } from '../ticket';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { TicketListGetAction, TicketListReturnGetAction, TicketListGetActionQuery, TicketSaveAction } from './ticket.actions';
+import { TicketListGetAction, TicketListReturnGetAction, TicketListGetActionQuery, TicketSaveAction, TicketEventSaveAction } from './ticket.actions';
 import { PagedResult } from '../../pagedResult';
+import { supportsPassiveEventListeners } from '@angular/cdk/platform';
 
 export interface TicketStateModel {
     tickets: ITicket[];
+
+    ultimoTicketCreato: ITicket;
+
+    ultimoEventoCreato: IEvento;
 }
 
 @State<TicketStateModel>({
     name: "tickets",
     defaults: {
-        tickets: []
+        tickets: [],
+        ultimoTicketCreato: {},
+        ultimoEventoCreato: {}
     }
 })
 export class TicketState {
@@ -22,6 +29,15 @@ export class TicketState {
     @Selector()
     static getTickets(state: TicketStateModel) {
         return state.tickets;
+    }
+
+    @Selector()
+    static getLastTicketCreatoInSessione(state: TicketStateModel) {
+        return state.ultimoTicketCreato;
+    }
+    @Selector()
+    static getLastEventoCreatoInSessione(state: TicketStateModel) {
+        return state.ultimoEventoCreato;
     }
 
     constructor(private httpclient: HttpClient) {
@@ -56,14 +72,43 @@ export class TicketState {
         data.append("stato", action.payload.ticket.stato);
         data.append("prio", action.payload.ticket.prio);
 
-        if(action.payload.file != null) {
-            data.append("uploadEventFile", action.payload.file);
-        }
-        
-        this.httpclient.post(this.stateApiUrl, data).subscribe(resp => {
-            console.log("saveTicket", resp);
+        // if(action.payload.file != null) {
+        //     data.append("uploadEventFile", action.payload.file);
+        // }
+
+        this.httpclient.post(this.stateApiUrl, data).subscribe((resp: ITicket) => {
+            console.log("saveTicket", resp._id);
+
+            if (resp._id !== null) {
+                ctx.dispatch(new TicketEventSaveAction({ ticketId: resp._id, evento: action.payload.evento, file: action.payload.file }));
+            }
         });
 
+        data = null;
+    }
+
+    @Action(TicketEventSaveAction)
+    saveEvent(ctx: StateContext<TicketStateModel>, action: TicketEventSaveAction) {
+        let data = new FormData();
+
+        data.append("testo", action.payload.evento.testo);
+        data.append("creatoDa", action.payload.evento.creatoDa);
+
+        if (action.payload.file != null) {
+            data.append("uploadEventFile", action.payload.file);
+        }
+
+        let queryParams = new HttpParams().set("id", action.payload.ticketId);
+
+        this.httpclient.post(this.stateApiUrl + "/" + action.payload.ticketId, data).subscribe((resp: IEvento) => {
+            console.log("saveTicketEvent", resp);
+
+            if (resp._id !== null) {
+                //ctx.dispatch(new TicketEventSaveAction({ ticketId: resp._id, evento: action.payload.evento, file: action.payload.file }));
+            }
+        });
+
+        data = null;
     }
 
 

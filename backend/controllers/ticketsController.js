@@ -69,7 +69,7 @@ exports.saveTicket = async (req, resp) => {
 
         const ret = await nuovoTicket.save()
 
-        resp.status(201).json({ id: ret._id })
+        resp.status(201).json({ _id: ret._id })
     } catch (error) {
         resp.status(500).json({
             messaggio: error
@@ -124,22 +124,26 @@ exports.saveEventTicket = async (req, resp) => {
             messaggio: "Non trovato."
         })
     }
-
+    d("saveEventTicket body", req.body)
+    d("saveEventTicket file", req.file)
     try {
-
-        const ticket = await Ticket.findById({ _id: req.params.id })
-
-        const nuovoEvento = await ticket.eventi.create(req.body.evento)
-
+        d("saveEventTicket id:", req.params.id)
+        const ticket = await Ticket.findById(req.params.id)
+        d("saveEventTicket ticket trovato", ticket)
+        const url = req.protocol + '://' + req.get('host');
+        req.body['file'] = url + '/public/files/portaleuploads/' + req.file.filename;
+        const nuovoEvento = await ticket.eventi.create(req.body)
+        d("saveEventTicket nuovo evento", nuovoEvento)
         await ticket.eventi.push(nuovoEvento)
 
         const ret2 = await ticket.save()
 
         d("push", nuovoEvento)
 
-        resp.status(200).json({ id: nuovoEvento._id })
+        resp.status(200).json({ _id: nuovoEvento._id })
 
     } catch (error) {
+        d(error)
         resp.status(500).json({
             messaggio: error
         })
