@@ -7,10 +7,17 @@ export interface ITicket {
     ticketProcad?: number;
     _id?: string;
     titolo?: string;
-    _cliente?: string;
+    _cliente?: ICliente;
     _tecnico?: string;
     eventi?: IEvento[];
-    __v?: number;
+    
+    countEventi?: number;
+}
+
+export interface ICliente {
+    _id?: string;
+    nome?: string;
+    cognome?: string;
 }
 
 export interface IEvento {

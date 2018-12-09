@@ -17,10 +17,8 @@ export class TokenInterceptor implements HttpInterceptor {
 
     intercept(req: HttpRequest<any>, next: HttpHandler) {
 
-        console.log(req);
-
-
         if (this.store.selectSnapshot<boolean>(state => state.auth.authOk)) {
+
             req = req.clone({
                 setHeaders: {
                     Authorization: `Bearer ${this.store.selectSnapshot<string>(state => state.auth.token)}`

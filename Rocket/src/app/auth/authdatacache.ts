@@ -43,13 +43,13 @@ export class AuthDataCache {
 
         const cnstr = new Date(ora.getTime() + expire);
 
-        this.cookie.set("token", token);
+        this.cookie.set("token", token, cnstr);
 
         this.cookie.set("expire", cnstr.toISOString());
 
         this.cookie.set("uid", userId);
 
-        this.cookie.set("fn", fullname);
+        this.cookie.set("fn", fullname, cnstr);
 
         this.readLocal();
     }

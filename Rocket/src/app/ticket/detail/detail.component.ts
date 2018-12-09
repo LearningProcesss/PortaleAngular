@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { SchemaService } from '../../schema/schema.service';
-import { ITicket, IEvento } from '../ticket';
+import { ITicket, IEvento, ICliente } from '../ticket';
 
 import { Observable } from 'rxjs';
-import { ITicketSchema, ITicketSchemaDefinition, IStringEnumOptions, IStringFieldEnum } from '../../schema/schema';
+import { IStringFieldEnum } from '../../schema/schema';
 import { map, startWith, switchMap } from 'rxjs/operators';
 import { Select, Store } from '@ngxs/store';
 import { UserState } from '../../user/state/user.state';
@@ -104,9 +104,14 @@ export class DetailComponent implements OnInit {
 
       const nomeUtente = this.store.selectSnapshot<string>(AuthState.authStateNome);
 
+      let _clienteModel: ICliente = {
+        _id: this.selectedIdCliente
+      }
+
       const nuovoTicket: ITicket = {
         titolo: this.ticketFormGroup.get("ticketFormTitolo").value + "",
-        _cliente: this.selectedIdCliente,
+        //_cliente: this.selectedIdCliente,
+        _cliente: _clienteModel,
         _tecnico: this.selectedIdTecnico,
         task: this.ticketFormGroup.get("ticketFormTask").value,
         prio: this.ticketFormGroup.get("ticketFormPrio").value,

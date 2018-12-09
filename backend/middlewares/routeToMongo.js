@@ -4,6 +4,7 @@
 
 const { ObjectID } = require("mongodb")
 const _ = require("lodash")
+const utils = require("../lib/utils")
 const d = require('debug')("app:routeToMongoMiddleware")
 const url = require("url")
 
@@ -21,7 +22,26 @@ const defaultActionsParser = {
     divide(requestQueryString).map(singleRawPrm => parseSingleUrlQueryParam(singleRawPrm.split(regDividePrm.options), singleRawPrm.split(regDividePrm.options2), aggregateBuilder))
   },
   p: function (requestProjectionString, aggregateBuilder) {
+
+    d(arguments.callee.name, requestProjectionString)
+
     if (!_.isNil(requestProjectionString)) {
+
+      if (requestProjectionString.indexOf('.') > 0) {
+
+        _.uniq(divide(requestProjectionString).filter(p => p.indexOf('.') >= 0).map(p => p.split('.')[0])).forEach(p => {
+          //aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$lookup"] !== undefined)].$lookup
+
+          aggregateBuilder.push({ $lookup: {} })
+        })
+
+        // [...requestProjectionString].filter(l => l === '.').forEach(l => {
+
+        //   aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$lookup"] !== undefined)].$lookup
+
+        //   aggregateBuilder.push({ $lookup: {} })
+        // })
+      }
 
       aggregateBuilder.push({ $project: {} })
 
@@ -37,7 +57,7 @@ const defaultActionsParser = {
 
     }
   },
-  l: function(requestLimitString, aggregateBuilder) {
+  l: function (requestLimitString, aggregateBuilder) {
     if (!_.isNil(requestLimitString)) {
 
       // d("defaultActionsParser", requestLimitString)
@@ -63,7 +83,7 @@ const defaultDataTypeConverters = {
 
 const regDividePrm = {
   options: /(<|=|>|!|\$|\^|~|\?)/g,
-  options2: /\b(?:[<>]=?|!|=|!=|\$|\^|~|\?)\b/g
+  options2: /\b(?:[<>]=?|!|=|!=|<|>>|<<|\$|\^|~|\?)\b/g
 }
 
 let holder = {
@@ -97,15 +117,17 @@ module.exports = function (options) {
 
     if (req.method == "GET") {
 
-      defaultActionsParser.q(!_.isNil(req.query.q) && req.query.q !== "" ? req.query.q : "_id??", aggregator, req.query.eo)
+      try {
+        defaultActionsParser.q(!_.isNil(req.query.q) && req.query.q !== "" ? req.query.q : "_id??", aggregator, req.query.eo)
 
-      defaultActionsParser.p(req.query.p, aggregator)
+        defaultActionsParser.p(req.query.p, aggregator)
 
-      defaultActionsParser.s(req.query.s, aggregator)
+        defaultActionsParser.s(req.query.s, aggregator)
 
-      defaultActionsParser.l(req.query.l, aggregator)
-
-      // d("MAIN result", aggregator)
+        defaultActionsParser.l(req.query.l, aggregator)
+      } catch (error) {
+        d(arguments.callee.name, error)
+      }
 
       req.mongoroute = { aggregatorResult: aggregator }
     }
@@ -211,17 +233,47 @@ function parseSingleUrlQueryParam(options, options2, aggregateBuilder) {
   operators = null
 }
 
+/**
+ * 
+ * @param {*} options 
+ * @param {*} options2 
+ * @param {*} aggregateBuilder 
+ */
 function parseSingleUrlProjectionParam(options, options2, aggregateBuilder) {
 
-  d("parseSingleUrlProjectionParam", options, options2)
-
-  // let modelPathSuborJoin = options[0].indexOf(".") > 0 ? options[0].split(".") : [options[0]]
+  let operators = _.difference(options, options2)
+  let modelPathSuborJoin = options[0].indexOf(".") > 0 ? options[0].split(".") : [options[0]]
   let modelPathField = options[0]
-  // let modelPathFieldType = holder.schema.path(modelPathField)
-  // let valore = options2[1]
-  // let operators = _.difference(options, options2)
+  let modelPathFieldType = holder.schema.path(modelPathField)
 
-  updateProjectPipeline(aggregateBuilder, modelPathField.toString().trim())
+  d(arguments.callee.name, "operators", operators)
+  d(arguments.callee.name, "options", options)
+  d(arguments.callee.name, "options2", options2)
+
+  if (options[0].indexOf(".") > 0) {
+    Object.assign(aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$lookup"] !== undefined)].$lookup, { from: "portalusers", localField: modelPathSuborJoin[0], foreignField: "_id", as: modelPathSuborJoin[0] })
+
+    d(arguments.callee.name, aggregateBuilder.findIndex(stage => stage["$unwind"] !== undefined && stage["$unwind"] === "$" + modelPathSuborJoin[0]))
+
+    if (aggregateBuilder.findIndex(stage => stage["$unwind"] !== undefined && stage["$unwind"] === "$" + modelPathSuborJoin[0]) === -1) {
+      aggregateBuilder.push(buildUnwindPipelineStage(modelPathSuborJoin[0]))
+    }
+  }
+
+  d(arguments.callee.name, "modelPathSuborJoin", modelPathSuborJoin)
+  d(arguments.callee.name, "modelPathField", modelPathField)
+  d(arguments.callee.name, "value", options2[1])
+  // d(arguments.callee.name, "modelPathFieldType", modelPathFieldType)
+
+  d(arguments.callee.name, "test projection", buildProjectionOperator(operators, modelPathField, modelPathFieldType, options2[1]))
+
+  // updateProjectPipeline(aggregateBuilder, modelPathField.toString().trim())
+  updateProjectPipeline2(aggregateBuilder, buildProjectionOperator(operators, modelPathField, modelPathFieldType, options2[1]))
+
+  modelPathField = null
+  modelPathFieldType = null
+  valore = null
+  operators = null
 }
 
 function parseSignleUrlSortParam(options, aggregateBuilder) {
@@ -280,14 +332,7 @@ function buildMatchPipelineStage(matchOperator, queryOperator) {
 }
 
 function buildUnwindPipelineStage(modelPathField) {
-  var u = {
-    $unwind: { path: '$' + modelPathField }
-  }
-  // var u = {
-  //   $unwind: '$_cliente'
-  // }
-
-  return u
+  return { $unwind: '$' + modelPathField }
 }
 
 function buildProjectPipelineStage() {
@@ -343,6 +388,21 @@ function buildMatchOperator(operators, modelPathFieldQuery, modelSchemaType, val
 
 }
 
+function buildProjectionOperator(operators, modelPathFieldQuery, modelSchemaType, value) {
+
+  if (operators.length == 0) {
+    return { [modelPathFieldQuery]: value !== undefined ? value : 1 }
+  } else if (operators.filter(l => l === '>').length == 2) {// $slice [a, b, c] se arriva 1 ritorna "a", se -1 ritorna "c"
+    return { [modelPathFieldQuery]: { $slice: ["$" + modelPathFieldQuery, +value] } }
+  } else if (operators.filter(l => l === '<').length == 2) {// $slice [a, b, c] se arriva 1 ritorna "a", se -1 ritorna "c"
+    return { [modelPathFieldQuery]: { $slice: ["$" + modelPathFieldQuery, parseFloat("-" + value.toString())] } }
+  } else if (operators.filter(l => l === '>').length == 1 && operators.filter(l => l === '?').length == 1) {// $slice [a, b, c] se arriva 1 ritorna "a", se -1 ritorna "c"
+    const cap = utils.capitalize(modelPathFieldQuery)
+    d("porca madosca", cap)
+    return { ["count" + cap]: { $size: "$" + modelPathFieldQuery } }
+  }
+}
+
 function updateMatchPipeline(aggregateBuilder, matchOperator) {
 
   if (aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$match"] !== undefined)].$match.$and !== undefined) {
@@ -360,9 +420,11 @@ function updateProjectPipeline(aggregateBuilder, field) {
 
   fieldc[field] = 1
 
-  d("updateProjectPipeline", fieldc)
-
   Object.assign(aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$project"] !== undefined)].$project, fieldc)
+}
+
+function updateProjectPipeline2(aggregateBuilder, projectPipe) {
+  Object.assign(aggregateBuilder[aggregateBuilder.findIndex(stage => stage["$project"] !== undefined)].$project, projectPipe)
 }
 
 /**

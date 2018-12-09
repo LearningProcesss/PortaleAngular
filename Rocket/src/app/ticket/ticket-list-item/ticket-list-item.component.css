@@ -1,0 +1,20 @@
+mat-card.standard {
+    
+    margin: 10px auto 5px 5px;
+
+    border-radius: 1px;
+    cursor: pointer;
+    box-sizing: border-box;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    border: solid transparent 2px;
+}
+
+mat-card:hover {
+    border: 2px solid green;
+}
+
+mat-card.clicked {
+    border: 2px solid #0074D9;
+}

@@ -1,0 +1,19 @@
+div.box_horizontal {
+    display: flex;
+    flex-direction: column;
+}
+div.box_vertical {
+    display: flex;
+    flex-direction: row;
+}
+
+div.m_grid {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-gap: 1em;
+}
+
+
+mat-paginator {
+    margin: 10px 55% 5px 5px;
+}

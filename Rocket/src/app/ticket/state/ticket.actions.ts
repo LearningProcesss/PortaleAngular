@@ -9,7 +9,7 @@ export class TicketListGetAction {
 
 export class TicketListGetActionQuery {
     static readonly type = '[TICKETS] TicketListGetActionQuery';
-    constructor(public readonly payload?: { q: string[] }) { }
+    constructor(public readonly payload?: { q?: string[], p?: string[] }) { }
 }
 
 

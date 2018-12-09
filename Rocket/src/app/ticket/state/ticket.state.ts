@@ -46,18 +46,28 @@ export class TicketState {
 
     @Action(TicketListGetActionQuery)
     getTicketsQuery(ctx: StateContext<TicketStateModel>, action: TicketListGetActionQuery) {
-        let q = action.payload.q.join(",");
 
-        var queryParams = new HttpParams().set("q", q);
+        // let queryParams = new HttpParams().set("q", action.payload.q.join(",")).set("p", action.payload.p.join(","));
+        let queryParams = new HttpParams();
 
+        if (action.payload.q !== null && action.payload.q !== undefined) {
+            queryParams = queryParams.set("q", action.payload.q.join(","));            
+        }
+        if (action.payload.p !== null && action.payload.p !== undefined) {
+            queryParams = queryParams.set("p", action.payload.p.join(","));
+        }
+        
         this.httpclient.get<PagedResult<ITicket>>(this.stateApiUrl, { params: queryParams })
             .subscribe(result => {
                 ctx.patchState({
-                    tickets: result.collection
+                    tickets: result.collection                    
                 });
+                // console.log(ctx.getState());
             }, (error) => {
 
             });
+        
+        
     }
 
     @Action(TicketSaveAction)
@@ -66,7 +76,7 @@ export class TicketState {
         let data = new FormData();
 
         data.append("titolo", action.payload.ticket.titolo);
-        data.append("_cliente", action.payload.ticket._cliente);
+        data.append("_cliente", action.payload.ticket._cliente.toString());
         data.append("_tecnico", action.payload.ticket._tecnico);
         data.append("task", action.payload.ticket.task);
         data.append("stato", action.payload.ticket.stato);

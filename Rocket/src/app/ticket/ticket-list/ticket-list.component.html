@@ -1,0 +1,23 @@
+<app-ticket-search></app-ticket-search>
+
+<div class="m_grid">
+  <div class="">
+    <app-ticket-list-item *ngFor="let ticket of $tickets | async; let i = index" [ticket]=ticket [index]=i
+      (onMatCardClick)="onItemMatCardClick($event)"></app-ticket-list-item>
+  </div>
+  <div class="">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+<!-- <div class="box_horizontal">
+  <app-ticket-list-item *ngFor="let ticket of $tickets | async; let i = index" [ticket]=ticket [index]=i
+    (onMatCardClick)="onItemMatCardClick($event)"></app-ticket-list-item>
+</div>
+<div class="box_vertical">
+  <router-outlet></router-outlet>
+</div> -->
+
+
+<!-- </div> -->
+<mat-paginator [length]="100" [pageSize]="10" [pageSizeOptions]="[5, 10, 20, 30]">
+</mat-paginator>

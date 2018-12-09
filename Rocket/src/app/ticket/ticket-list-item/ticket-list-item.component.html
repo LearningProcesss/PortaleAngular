@@ -1,0 +1,15 @@
+<mat-card class="standard" [ngClass]="clicked ? 'clicked' : 'normal'" (click)="onMatCardItemClick()">
+  <mat-card-header>
+    <mat-card-title>{{ ticket.titolo }}</mat-card-title>
+    <mat-card-subtitle>{{ ticket._cliente.cognome}} {{ticket._cliente.nome}}</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <strong>Ultimo evento:</strong><br>
+    {{ ticket.eventi[0].testo }}<br>
+    <strong>Il: </strong>{{ticket.eventi[0].creatoIl | date: 'dd-MM-yyyy HH:mm:ss'}} <strong>Da: </strong>{{ticket.eventi[0].creatoDa}}<br>
+    <strong>N° eventi: </strong> {{ticket.countEventi}}
+  </mat-card-content>
+  <!-- <mat-card-actions>
+    <button mat-button>Ok</button>
+  </mat-card-actions> -->
+</mat-card>

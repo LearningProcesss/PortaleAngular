@@ -102,7 +102,7 @@ export class AuthState {
 
     @Action(LoginSuccesfull)
     onLoginSuccess(ctx: StateContext<AuthStateModel>, action: LoginSuccesfull) {
-        ctx.dispatch(new Navigate(['/tickets/new']));
+        ctx.dispatch(new Navigate(['/tickets']));
     }
 
     @Action(QueryPortalUsersAction)

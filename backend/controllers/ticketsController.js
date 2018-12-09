@@ -49,7 +49,9 @@ exports.getTickets = async (req, resp) => {
     try {
         pagedResult.setcollection = await Ticket.aggregate(req.mongoroute.aggregatorResult)
     } catch (error) {
-
+        resp.status(500).json({
+            messaggio: error
+        })
     }
 
     resp.json(pagedResult)
